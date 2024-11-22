@@ -2,8 +2,22 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "PM566_Final",
+    "title": "PM566 Lab 12",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+    "text": "# Initialize code chunk options\nopts_chunk$set(\n  warning = FALSE,\n  message = FALSE,\n  eval=TRUE,\n  echo = TRUE,\n  cache = FALSE,\n  fig.width = 7, \n  fig.align = 'center',\n  fig.asp = 0.618,\n  out.width = \"700px\")\nsource(\"process_COVID_data.R\")\np1_scatter &lt;- cv_states_today %&gt;% \n  plot_ly(x = ~pop_density, y = ~deathsper100k,\n          type = 'scatter', mode = 'markers', color = ~state,\n          size = ~population, sizes = c(5, 70), marker = list(sizemode='diameter', opacity=0.5),\n          hoverinfo = 'text',\n          text = ~paste( paste(state, \":\", sep=\"\"), paste(\" Cases per 100k: \", per100k, sep=\"\") , paste(\" Deaths per 100k: \",\n                        deathsper100k, sep=\"\"), sep = \"&lt;br&gt;\")) %&gt;%\n  layout(title = \"Population-normalized COVID-19 deaths vs. population density\",\n                  yaxis = list(title = \"Deaths per 100k\"), xaxis = list(title = \"Population Density\"),\n         hovermode = \"compare\")\n\n# filter out \"District of Columbia\"\ncv_states_today_scatter &lt;- cv_states_today %&gt;% filter(state!=\"District of Columbia\")\n\np2_scatter &lt;- cv_states_today_scatter %&gt;% \n  plot_ly(x = ~pop_density, y = ~deathsper100k,\n          type = 'scatter', mode = 'markers', color = ~state,\n          size = ~population, sizes = c(5, 70), marker = list(sizemode='diameter', opacity=0.5),\n          hoverinfo = 'text',\n          text = ~paste( paste(state, \":\", sep=\"\"), paste(\" Cases per 100k: \", per100k, sep=\"\") , paste(\" Deaths per 100k: \",\n                        deathsper100k, sep=\"\"), sep = \"&lt;br&gt;\")) %&gt;%\n  layout(title = \"Population-normalized COVID-19 deaths vs. population density\",\n                  yaxis = list(title = \"Deaths per 100k\"), xaxis = list(title = \"Population Density\"),\n         hovermode = \"compare\")"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Final Project for PM566",
+    "section": "",
+    "text": "This is my website for my F66 Final Project. Expect updates soon!\nThis website is also being used for Lab 12."
+  },
+  {
+    "objectID": "index.html#showcasing-plots",
+    "href": "index.html#showcasing-plots",
+    "title": "PM566 Lab 12",
+    "section": "Showcasing plots",
+    "text": "Showcasing plots\n\nTab 1\n\n\n\n\n\n\n\n\nTab 2"
   }
 ]

@@ -4,16 +4,24 @@ project:
 
 
 website:
-  title: "PM566_Final"
+  title: "PM566 Lab 12 and Final"
+
+
   navbar:
-    left:
-      - href: index.qmd
+    left: 
+    
+      - href: about.qmd
         text: Home
-      - about.qmd
+      - href: index.qmd
+        text: Lab 12
+      
+      
+   
+      
 
 format:
   html:
-    theme: cosmo
+    theme: united
     css: styles.css
     toc: true
 

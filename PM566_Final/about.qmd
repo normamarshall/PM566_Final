@@ -1,9 +1,7 @@
 ---
-title: "About"
+title: "Final Project for PM566"
 ---
 
-About this site
+This is my website for my F66 Final Project. Expect updates soon!
 
-```{r}
-1 + 1
-```
+This website is also being used for Lab 12.
