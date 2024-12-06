@@ -1,7 +1,17 @@
 ---
-title: "Final Project for PM566"
+title: Data Sources and Report Download  
 ---
 
-This is my website for my F66 Final Project. Expect updates soon!
+#### Click below to Download this report!
 
-This website is also being used for Lab 12.
+
+[Download](./PM_566_Final_Report.pdf)
+
+
+## Data Collection
+
+The two 2023 databases from the HCAI were downloaded and made publiclly available by the state of California. Data dictionary for the financial data report could be found at the link below and the data dictionary for the supplier diversity dataset is found within the excel file.
+
+-   [2023 Supplier Diversity Report](https://data.chhs.ca.gov/dataset/hospital-supplier-diversity-reports)
+-   [2023 Hospital Annual Financial Data](https://data.chhs.ca.gov/dataset/hospital-annual-financial-data-selected-data-pivot-tables)
+    -   [Hospital Financial Data Documentation](https://data.chhs.ca.gov/dataset/hospital-annual-financial-data-selected-data-pivot-tables/resource/842c8bcb-bfac-4aa9-9de8-b11eb049f6de)

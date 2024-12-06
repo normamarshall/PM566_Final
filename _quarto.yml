@@ -4,7 +4,7 @@ project:
 
 
 website:
-  title: "PM566 Lab 12 and Final"
+  title: "PM566 Final Project"
 
 
   navbar:
@@ -13,7 +13,7 @@ website:
       - href: index.qmd
         text: Home
       - href: about.qmd
-        text: Lab 12
+        text: Download Report
       
       
    
