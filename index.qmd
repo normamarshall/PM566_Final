@@ -4,7 +4,6 @@ author: "Norma Marshall"
 format: html
 embed-resources: true
 warning: false
-runtime: shiny
 ---
 
 ```{r, echo = FALSE}
@@ -94,16 +93,6 @@ In this report there are 372 hospitals with both financial and supplier diversit
 
 A majority of these hospitals (320) serve urban areas in California, as demonstrated by large clusters of hospitals around major cities such as San Francisco, San Diego, and Los Angeles. Over 53% of the hospitals are nonprofit, including church related facilities.
 
-```{r, echo = FALSE}
-leaflet(data = final_hospitals) %>%
-  addTiles() %>%
-  addCircleMarkers(~longitude, ~latitude,
-                   popup = ~Hospital_Name,  # Display hospital name on click
-                   radius = 5, color = "blue", fill = TRUE, fillOpacity = 0.7) %>%
-  setView(lng = -119.4179, lat = 36.7783, zoom = 6)  # Center on California
-
-
-```
 
 ```{r, echo = FALSE}
 
@@ -227,8 +216,11 @@ kable(final_table, caption = "Table 4. Average Procrument Per Diverse Supplier (
 Washington Hospital in Fremont spends in the most on minority owned suppliers, followed by Stanford Health Care. In specific category, Kaiser Permanente in Santa Clara spends the most on African American suppliers while Stanford leads for Hispanic and Asian/Pacific Category. Washington Hospital in Fremont also is the top performer in the unknown minority category while, such as Kaiser Foundation Hospital - San Diego and Contra Costa Regional Medical Center, lead in categories like total women-owned and LGBT-owned suppliers, respectively.
 
 ```{r, echo = FALSE}
-# Create the scatter plot using ggplot2
-base_plot <- ggplot(final_hospitals, aes(x = Combined_Total, y = NET_INCOME, text = Hospital_Name)) +
+# Filter out the specified hospitals
+filtered_data <- final_hospitals %>%
+  filter(!Hospital_Name %in% c("STANFORD HEALTH CARE", "WASHINGTON HOSPITAL - FREMONT"))
+
+base_plot <- ggplot(filtered_data, aes(x = Combined_Total, y = NET_INCOME, text = paste("Hospital Name: ", Hospital_Name, "<br>Net Income: $", NET_INCOME, "Diverse Procrument: $", Combined_Total))) +
   geom_point(color = "blue", size = 2, alpha = 0.7) +
   labs(
     title = "Interactive Scatter Plot of Combined Total vs. Net Income",
@@ -242,6 +234,7 @@ interactive_plot <- ggplotly(base_plot, tooltip = "text")
 
 # Display the plot
 interactive_plot
+
 
 ```
 
@@ -294,35 +287,36 @@ kable(top_hospitals_df,
 
 Across categories and in total, a majority of hospitals that spend the most money on diverse suppliers residei n the bay area. However, there are a signicant number of hospitals that spend a lot of money suppliers from women and disabled veterans in Southern California. Hospitals in northern California include a few state and University of California hospitals including UC San Francisco and Stanford.
 
-```{r, echo = FALSE}
-# Explicitly list the variables to create maps for
-selected_vars <- c(
-  "Total_African_American", "Total_Hispanic_American",
-  "Total_Native_American", "Total_Asian_Pacific_American",
-  "Total_Unknown_Minority", "Total_Minority",
-  "Total_Women", "Total_LGBT", "Total_Disabled_Veteran"
-)
+```{r, echo=FALSE}
+# Load the viridis package
+library(viridis)
 
-create_map <- function(var_name) {
-  color_pal <- colorNumeric("Purples", domain = final_hospitals[[var_name]], na.color = "transparent")
-  
-  leaflet(data = final_hospitals) %>%
-    addProviderTiles("CartoDB.Positron") %>%
-    setView(lng = -119.4179, lat = 36.7783, zoom = 6) %>%  
-    addCircles(
-      lat = ~latitude, lng = ~longitude,
-      color = ~color_pal(final_hospitals[[var_name]]),  
-      opacity = 1, fillOpacity = 0.8
-    ) %>%
-    addLegend("bottomleft", pal = color_pal, values = final_hospitals[[var_name]],
-              title = var_name, opacity = 1)
-}
+# Create a viridis color palette for Total Minority
+total_minority_palette <- colorNumeric(palette = viridis(256), 
+                                       domain = final_hospitals$Total_Minority)
 
-# Generate a list of maps for each specified variable
-map_list <- lapply(selected_vars, create_map)
+# Create a leaflet plot for hospitals
+leafplot <- leaflet(final_hospitals) %>% 
+  addProviderTiles('CartoDB.Positron') %>% 
+  addCircles(
+    lat = ~latitude,  
+    lng = ~longitude,  
+    label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
+    color = ~total_minority_palette(Total_Minority),  
+    opacity = 1, 
+    fillOpacity = 1,
+    stroke = FALSE,  
+    radius = 5       
+  ) %>%
+  addLegend('bottomleft', 
+            pal = total_minority_palette, 
+            values = final_hospitals$Total_Minority,
+            title = 'Total Minority in Hospitals', 
+            opacity = 1) %>%
+  setView(lng = -119.4179, lat = 36.7783, zoom = 6)  # Set view to California
 
-# Display all maps in one view
-browsable(tagList(map_list))
+leafplot
+
 
 ```
 
@@ -460,7 +454,9 @@ kable(correlation_table,
 
 ```
 
-CONNECTION TO MEDICAL
+## What about Medi-Cal Revenue?
+
+Medi-Cal revenue is an important factor to consider when looking at procurement from diverse suppliers because hospitals that serve a higher proportion of Medi-Cal patients may face different financial pressures compared to those with a more commercially insured patient base. The correlation analysis shows that the relationships between diverse supplier procurement and Medi-Cal revenue are mostly weak and negative for several minority groups, indicating limited impact or a lack of strong association. However, procurement from diverse suppliers can still be a strategy to fulfill diversity and inclusion goals, potentially improve cost efficiency, foster local engagement, and ensure compliance with government contracts, which may influence financial outcomes and help advance community health equity objectives.
 
 ```{r, echo = FALSE}
 # Function to calculate correlation with medical revenue for each selected variable ratio
@@ -535,6 +531,8 @@ Each hospital is also required to report a supplier diversity statement to state
 
 From this analysis suppliers have a strong commitment to procuring from diverse suppliers in order to support the business needs of the hospitals. They also aim to drive some sort of competition, possibly between suppliers to lower prices.
 
+It is also important to note that many indivudals submitting these reports on the behalf of hospitals may not choose to submit a diversity statment, thus many entries invovled smaller nonsensicle terms like "N/A". 
+
 ```{r, echo = FALSE}
 final_hospitals %>%
   unnest_tokens(word, Supplier_Diversity_Statement) %>%
@@ -593,7 +591,9 @@ kable(tf_idf_grouped, caption = " Table 10. TF-IDF values for the Top 5 Words in
 
 ```
 
-INTERACTIVE E TABLE
+## Supplier Diversity Statments 
+
+If you want to see the supplier diversity statemetn for a specific hopsital of your choosing you can enter in the search bar below! 
 
 ```{r, echo = FALSE}
 library(DT)
