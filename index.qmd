@@ -1,5 +1,5 @@
 ---
-title: "PM 566 Midterm - California Supplier Diversity and Net Income"
+title: "PM 566 Final Project - California Supplier Diversity and Net Income"
 author: "Norma Marshall"
 format: html
 embed-resources: true
@@ -117,7 +117,7 @@ summary_table <- final_hospitals %>%
     `Average Net Income` = mean(NET_INCOME, na.rm = TRUE)
   )
 
-kable(summary_table, caption = "Summary Table of Hospital Data")
+kable(summary_table, caption = "Table 1. Summary Table of Hospital Data")
 
 
 urban_rural_freq <- final_hospitals %>%
@@ -130,8 +130,8 @@ type_control_freq <- final_hospitals %>%
   summarize(Frequency = n()) %>%
   ungroup()
 
-kable(urban_rural_freq, caption = "Frequencies of Urban/Rural Hospitals")
-kable(type_control_freq, caption = "Frequencies of Hospital Types)")
+kable(urban_rural_freq, caption = "Table 2. Frequencies of Urban/Rural Hospitals")
+kable(type_control_freq, caption = "Table 3. Frequencies of Hospital Types)")
 
 ```
 
@@ -215,48 +215,12 @@ final_table <- final_table %>%
   )
 
 # Arrange and display the table
-kable(final_table)
-
-
-
-```
-
-```{r, echo = FALSE}
-# Assuming your current table is named `avg_procurement`
-
-# Extract ethnicities by removing prefixes and other identifiers
-avg_procurement$Ethnicity <- gsub(
-  "Tier_I_|Tier_II_|Combined_|Total_|Less_Duplicated_Amount", 
-  "", 
-  avg_procurement$Group
-)
-
-# Pivot the data to have separate columns for Tier 1 and Tier 2 averages
-library(dplyr)
-library(tidyr)
-
-final_table <- avg_procurement %>%
-  select(Ethnicity, Average_Procurement, Tier) %>%
-  pivot_wider(
-    names_from = Tier,
-    values_from = Average_Procurement,
-    names_prefix = "Tier_"
-  ) %>%
-  # Calculate Total Average
-  mutate(Total_Average = rowMeans(select(., starts_with("Tier_")), na.rm = TRUE))
-
-# Rename the columns based on the actual column names
-final_table <- final_table %>%
-  rename(
-    `Tier 1 Average` = `Tier_Tier 1`,
-    `Tier 2 Average` = `Tier_Tier 2`
-  )
-
-# Arrange and display the table
-kable(final_table)
+kable(final_table, caption = "Table 4. Average Procrument Per Diverse Supplier (Tier 1/2/Total) ")
 
 
 ```
+
+
 
 # How much are hosptials spending on supplies from minority owned businessess?
 
@@ -289,7 +253,7 @@ top_diverse_hospitals <- final_hospitals %>%
   select(Hospital_Name, Total_Minority) %>%  
   head(n = 10)  
 
-kable(top_diverse_hospitals, col.names = c("Hospital Name", "Combined Total Spent on Minority Owned Suppliers"))
+kable(top_diverse_hospitals, col.names = c("Hospital Name", "Combined Total"), caption = "Table 5. Combined Total Spent on Minority Owned Suppliers" )
 
 
 ```
@@ -321,7 +285,7 @@ for (var_name in selected_vars) {
 # Display the table with kable, including the Category column
 kable(top_hospitals_df, 
       col.names = c("Top Hospital", "% of Total Procurement", "Category"),
-      caption = "Top Performing Hospitals by Category")
+      caption = "Table 6. Top Performing Hospitals by Category (percentage of of total procurment from diverse suppleirs)")
 
 
 ```
@@ -382,8 +346,7 @@ top_hospitals <- final_hospitals %>%
 # Display the table with just kable
 kable(top_hospitals, 
       col.names = c("Hospital Name", "Net Income"), 
-      caption = "Top 10 Hospitals by Net Income",
-      format = "html")  # Specify HTML format to ensure compatibility in an HTML document
+      caption = "Table 7. Top 10 Hospitals by Net Income")
 
 
 ```
@@ -491,7 +454,7 @@ correlation_table <- data.frame(
 # Display the table using kable
 kable(correlation_table, 
       col.names = c("Ethnicity", "Tier 1 Correlation", "Tier 2 Correlation", "Total Average Correlation"),
-      caption = "Correlation of Diverse Groups with Net Income in Tier 1, Tier 2, and Overall Procurement"
+      caption = "Table 8. Correlation of Diverse Groups with Net Income in Tier 1, Tier 2, and Overall Procurement"
 )
 
 
@@ -560,7 +523,7 @@ correlation_table <- data.frame(
 # Display the table using kable
 kable(correlation_table, 
       col.names = c("Variable", "Correlation with Medical Revenue"),
-      caption = "Correlation of Selected Variables' Ratios with Medical Revenue"
+      caption = "Table 9. Correlation of Percentage of total Procurment from Diversie Suppliers with Medi-Cal Net Revenue"
 )
 
 
@@ -588,7 +551,8 @@ final_hospitals %>%
   count(token, sort=TRUE) %>%
   top_n(20, n) %>%
   ggplot(aes(x = n, y = fct_reorder(token, n))) +
-  geom_col()
+  geom_col()+
+  title("Top 20 Tokens Found In Supplier Diversity Statements")
 ```
 
 ```{r, echo = FALSE}
@@ -625,7 +589,7 @@ tf_idf_grouped <- final_hospitals_clean %>%
   top_n(5, tf_idf)                                      # Get the top 5 words per each Type_Control group
 
 # Display the result in a table
-kable(tf_idf_grouped, caption = "TF-IDF values for the Top 5 Words in Supplier Diversity Statements by Type Control (Preprocessed)")
+kable(tf_idf_grouped, caption = " Table 10. TF-IDF values for the Top 5 Words in Supplier Diversity Statements Hospital Type ")
 
 ```
 
@@ -640,7 +604,7 @@ library(dplyr)
 # Create the interactive table
 datatable(final_hospitals %>% select(Hospital_Name, Supplier_Diversity_Statement), 
           options = list(pageLength = 5, autoWidth = TRUE), 
-          caption = "Hospital Supplier Diversity Statements")
+          caption = "Table 11. Hospital Supplier Diversity Statements")
 
 
 ```
