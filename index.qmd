@@ -1,76 +1,766 @@
 ---
-title: "PM566 Lab 12"
+title: "PM 566 Midterm - California Supplier Diversity and Net Income"
+author: "Norma Marshall"
+format: html
+embed-resources: true
+warning: false
+runtime: shiny
 ---
 
-```{r setup, message=FALSE, echo=FALSE, warning=FALSE}
-library(data.table)
-library(tidyverse)
+
+
+```{r}
 library(dplyr)
-library(plotly)
-library(DT)
+library(readxl)
+library(tidygeocoder)
+library(leaflet)
+library(tidyr)
 library(knitr)
+library(ggplot2)
+library(htmltools)
+library(tidytext)
+library(readr)
+library(stringr)    
+library(forcats)  
+library (plotly)
+library(writexl)
+library(shiny)
+
+```
+# Background and Research Question 
+
+To accelerate efforts to reduce health care disparities, hospitals and health systems increase their efforts in core areas such as staff and leadership diversity and cultural competence.  However, the economic relationship between healthcare systems and the communities they serve are growing in importance. 
+
+Supplier diversity refers to when an organization procures goods and services from a variety of businesses, including those that are at least 51% owned, managed, and operated from marginalized and minority groups. These include women, veterans, African Americans, LGBTQIA+, and more. The private sector, including the healthcare industry has incorporated supplier diversity programs into their business practices after historically being adopted by the federal government and its contractors. According to the Harvard Business Review, supplier diversity programs are important in combatting social injustice and systemic racism in the US as they actively include diverse representation and inclusion in hospital operations and supply chains. In addition, for the moral and ethical arguments, supplier diversity programs have commercial in hospitals and health systems.  These benefits include greater innovation and value through cost reductions, expansions of external partnerships, local job creation, better understanding of supply chain sourcing process and sources, and easier compliance with government and grant contracts. 
+
+On an annual basis (individual hospital fiscal year), individual hospitals and systems report detailed facility level financial data to the Department of Health Care Access and Information (HCAI).  This data includes detailed facility level data on services capacity, inpatient/outpatient utilization, revenues, and expenses by type and payer. In addition, the Health and Safety Code Section 1339.85-1339.87 requires individual hospitals with operating expenses over $50 million to report hospital supplier and diversity reports explaining the hospitals’ supplier diversity statement and procurement efforts regarding minority, women, LGBT, and disabled veteran enterprises.  
+
+This report merges the annual financial data and supplier diversity reports for 2023 to answer the question **Are California hospitals with diverse suppliers profitable?**  Supplier diversity aims to increase innovation and drive down prices for supplies and goods though competition while also aiming to improve health equity and combat social injustice in the US through business practices. This exploratory data analysis aims to see if funds dedicated to goods and services from diversely owned businesses can lead to better financial outcomes. 
+
+
+# Methods 
+A novel dataset was collected by merging two data sets, HCAI's Hospital Annual Financial
+Disclosure Report for 2023, and HCAI’s Supplier Diversity report from 2023. Required by state law, supplier diversity and financial data are reported each year to the HCAI. Datasets were merged on the shared hospital name variable to create a comprehensive data containing both supplier diversity and financial metrics for each hospital. 
+
+Following the merge, several variables indicating procurement from diverse backgrounds were recoded to be used as numeric variables, allowing for quantitative analysis. Address related variables were recoded into latitude and longitude variables to facilitate geocoding using the tidygeocoder package for recoding and the leaflet package for visualization. 
+
+Frequency tables were generated to view top hospitals in net income, supplier procurement from different backgrounds, and demographic data. Maps were generated to locate the top performing hospitals and correlations were run to quantify the relationship between supplier procurement and hospital net income. 
+
+
+
+```{r}
+hospital_suppliers <- read_excel("supplier-diversity-report-2023-extract-.xlsx")
+hospital_finances <- read_excel("hadr-2023.xlsx")
+hospitals <- merge(hospital_suppliers, hospital_finances, by = "Hospital_Name", all.x = TRUE)
+final_hospitals <- hospitals %>%
+  select(Hospital_Name, Hospital_Address, Type_Control, County, MSSA, Supplier_Diversity_Statement, Encourage_Suppliers, Encourage_Employees, Conduct_Outreach_Comm, Certification_Support, Tier_I_African_American, Tier_II_African_American, Total_African_American, Tier_I_Hispanic_American, Tier_II_Hispanic_American, Total_Hispanic_American, Tier_I_Native_American, Tier_II_Native_American, Total_Native_American, Tier_I_Asian_Pacific_American, Tier_II_Asian_Pacific_American, Total_Asian_Pacific_American, Tier_I_Unknown_Minority, Tier_II_Unknown_Minority, Total_Unknown_Minority, Total_Tier_I_Minority, Total_Tier_II_Minority, Total_Minority, Tier_I_Women, Tier_II_Women, Total_Women, Tier_I_LGBT, Tier_II_LGBT, Total_LGBT, Tier_I_Disabled_Veteran, Tier_II_Disabled_Veteran, Total_Disabled_Veteran, Tier_I_Less_Duplicated_Amount, Tier_II_Less_Duplicated_Amount, Total_Less_Duplicated_Amount, Combined_Tier_I_Total, Combined_Tier_II_Total, Combined_Total, Total_Hospital_Procurement, ADDRESS, CITY, ZIP_CODE, GR_PT_REV, DED_FR_REV, TOT_CAP_REV, NET_PT_REV, OTH_OP_REV, TOT_OP_EXP, NET_FRM_OP, NONOP_REV, NONOP_EXP, INC_TAX, EXT_ITEM, NET_INCOME, EXP_SAL, EXP_BEN, EXP_PHYS, EXP_OTHPRO, EXP_SUPP, EXP_PURCH, EXP_DEPRE, EXP_LEASES, EXP_INSUR, EXP_INTRST, EXP_OTH, NETRV_MCAL_TR 
+)  
+ 
 ```
 
-```{r load-data, echo=FALSE}
-source("process_COVID_data.R")
+
+```{r}
+
+final_hospitals <- final_hospitals %>%
+  unite("full_address", ADDRESS, CITY, ZIP_CODE, sep = ", ", remove = FALSE) %>%
+  geocode(address = full_address, method = "osm", lat = latitude, long = longitude)
+
+
+
+```
+```{r}
+final_hospitals <- final_hospitals %>%
+  mutate(
+    Combined_Total = as.numeric(as.character(Combined_Total)),  
+    Total_Hospital_Procurement = as.numeric(as.character(Total_Hospital_Procurement)), 
+    Total_Minority = as.numeric(as.character(Total_Minority))  
+  )
+
+final_hospitals <- final_hospitals %>%
+  mutate(across(c(Tier_I_African_American, Tier_II_African_American, Total_African_American,
+                  Tier_I_Hispanic_American, Tier_II_Hispanic_American, Total_Hispanic_American,
+                  Tier_I_Native_American, Tier_II_Native_American, Total_Native_American,
+                  Tier_I_Asian_Pacific_American, Tier_II_Asian_Pacific_American, Total_Asian_Pacific_American,
+                  Tier_I_Unknown_Minority, Tier_II_Unknown_Minority, Total_Unknown_Minority,
+                  Total_Tier_I_Minority, Total_Tier_II_Minority, Total_Minority,
+                  Tier_I_Women, Tier_II_Women, Total_Women,
+                  Tier_I_LGBT, Tier_II_LGBT, Total_LGBT,
+                  Tier_I_Disabled_Veteran, Tier_II_Disabled_Veteran, Total_Disabled_Veteran,
+                  Tier_I_Less_Duplicated_Amount, Tier_II_Less_Duplicated_Amount, Total_Less_Duplicated_Amount,
+                  Combined_Tier_I_Total, Combined_Tier_II_Total, Combined_Total, Total_Hospital_Procurement, NETRV_MCAL_TR ),
+                as.numeric))
+
+```
+
+# Demographics
+
+
+In this report there are 372 hospitals with both financial and supplier diversity data reported the to the HCAI in 2023. On average these hospitals report earning over 24 million dollars over the course of the year and spend over $9.6 million on supplies from diverse suppliers, totaling about 9 percent of the total dollars spent on the procurement on supplies annually. 
+
+A majority of these hospitals (320) serve urban areas in California, as demonstrated by large clusters of hospitals around major cities such as San Francisco, San Diego, and Los Angeles.  Over 53% of the hospitals are nonprofit, including church related facilities. 
+ 
+
+
+
+```{r}
+leaflet(data = final_hospitals) %>%
+  addTiles() %>%
+  addCircleMarkers(~longitude, ~latitude,
+                   popup = ~Hospital_Name,  # Display hospital name on click
+                   radius = 5, color = "blue", fill = TRUE, fillOpacity = 0.7) %>%
+  setView(lng = -119.4179, lat = 36.7783, zoom = 6)  # Center on California
+
+
+```
+
+
+
+
+```{r}
+
+
+
+summary_table <- final_hospitals %>%
+  summarize(
+    `Total Hospitals` = n(),
+    `Average Procurement from Diverse Suppliers` = mean(Combined_Total, na.rm = TRUE),
+    `Average Total Hospital Procurement` = mean(Total_Hospital_Procurement, na.rm = TRUE),
+    `Average Net Income` = mean(NET_INCOME, na.rm = TRUE)
+  )
+
+kable(summary_table, caption = "Summary Table of Hospital Data")
+
+
+urban_rural_freq <- final_hospitals %>%
+  group_by(MSSA) %>%
+  summarize(Frequency = n()) %>%
+  ungroup()
+
+type_control_freq <- final_hospitals %>%
+  group_by(Type_Control) %>%
+  summarize(Frequency = n()) %>%
+  ungroup()
+
+kable(urban_rural_freq, caption = "Frequencies of Urban/Rural Hospitals")
+kable(type_control_freq, caption = "Frequencies of Hospital Types)")
+
 ```
 
 ```{r}
-# Initialize code chunk options
-opts_chunk$set(
-  warning = FALSE,
-  message = FALSE,
-  eval=TRUE,
-  echo = TRUE,
-  cache = FALSE,
-  fig.width = 7, 
-  fig.align = 'center',
-  fig.asp = 0.618,
-  out.width = "700px")
+# Define Tier I and Tier II variables
+tier1_vars <- c(
+  "Tier_I_African_American",
+  "Tier_I_Hispanic_American",
+  "Tier_I_Native_American",
+  "Tier_I_Asian_Pacific_American",
+  "Tier_I_Unknown_Minority",
+  "Total_Tier_I_Minority",
+  "Tier_I_Women",
+  "Tier_I_LGBT",
+  "Tier_I_Disabled_Veteran",
+  "Tier_I_Less_Duplicated_Amount",
+  "Combined_Tier_I_Total"
+)
+
+tier2_vars <- c(
+  "Tier_II_African_American",
+  "Tier_II_Hispanic_American",
+  "Tier_II_Native_American",
+  "Tier_II_Asian_Pacific_American",
+  "Tier_II_Unknown_Minority",
+  "Total_Tier_II_Minority",
+  "Tier_II_Women",
+  "Tier_II_LGBT",
+  "Tier_II_Disabled_Veteran",
+  "Tier_II_Less_Duplicated_Amount",
+  "Combined_Tier_II_Total"
+)
+
+# Calculate average procurement for each group in Tier 1
+avg_tier1_groups <- sapply(tier1_vars, function(var) {
+  mean(final_hospitals[[var]], na.rm = TRUE)
+})
+
+# Calculate average procurement for each group in Tier 2
+avg_tier2_groups <- sapply(tier2_vars, function(var) {
+  mean(final_hospitals[[var]], na.rm = TRUE)
+})
+
+# Combine results into a data frame for better readability
+avg_procurement <- data.frame(
+  Group = c(tier1_vars, tier2_vars),
+  Average_Procurement = c(avg_tier1_groups, avg_tier2_groups),
+  Tier = rep(c("Tier 1", "Tier 2"), c(length(tier1_vars), length(tier2_vars)))
+)
+
+
+
+# Assuming your current table is named `avg_procurement`
+
+# Extract ethnicities by removing prefixes and other identifiers
+avg_procurement$Ethnicity <- gsub(
+  "Tier_I_|Tier_II_|Combined_|Total_|Less_Duplicated_Amount", 
+  "", 
+  avg_procurement$Group
+)
+
+# Pivot the data to have separate columns for Tier 1 and Tier 2 averages
+library(dplyr)
+library(tidyr)
+
+final_table <- avg_procurement %>%
+  select(Ethnicity, Average_Procurement, Tier) %>%
+  pivot_wider(
+    names_from = Tier,
+    values_from = Average_Procurement,
+    names_prefix = "Tier_"
+  ) %>%
+  # Calculate Total Average
+  mutate(Total_Average = rowMeans(select(., starts_with("Tier_")), na.rm = TRUE))
+
+# Rename the columns based on the actual column names
+final_table <- final_table %>%
+  rename(
+    `Tier 1 Average` = `Tier_Tier 1`,
+    `Tier 2 Average` = `Tier_Tier 2`
+  )
+
+# Arrange and display the table
+print(final_table)
+
+
+
 ```
 
 ```{r}
- source("process_COVID_data.R")
-p1_scatter <- cv_states_today %>% 
-  plot_ly(x = ~pop_density, y = ~deathsper100k,
-          type = 'scatter', mode = 'markers', color = ~state,
-          size = ~population, sizes = c(5, 70), marker = list(sizemode='diameter', opacity=0.5),
-          hoverinfo = 'text',
-          text = ~paste( paste(state, ":", sep=""), paste(" Cases per 100k: ", per100k, sep="") , paste(" Deaths per 100k: ",
-                        deathsper100k, sep=""), sep = "<br>")) %>%
-  layout(title = "Population-normalized COVID-19 deaths vs. population density",
-                  yaxis = list(title = "Deaths per 100k"), xaxis = list(title = "Population Density"),
-         hovermode = "compare")
+# Assuming your current table is named `avg_procurement`
 
-# filter out "District of Columbia"
-cv_states_today_scatter <- cv_states_today %>% filter(state!="District of Columbia")
+# Extract ethnicities by removing prefixes and other identifiers
+avg_procurement$Ethnicity <- gsub(
+  "Tier_I_|Tier_II_|Combined_|Total_|Less_Duplicated_Amount", 
+  "", 
+  avg_procurement$Group
+)
 
-p2_scatter <- cv_states_today_scatter %>% 
-  plot_ly(x = ~pop_density, y = ~deathsper100k,
-          type = 'scatter', mode = 'markers', color = ~state,
-          size = ~population, sizes = c(5, 70), marker = list(sizemode='diameter', opacity=0.5),
-          hoverinfo = 'text',
-          text = ~paste( paste(state, ":", sep=""), paste(" Cases per 100k: ", per100k, sep="") , paste(" Deaths per 100k: ",
-                        deathsper100k, sep=""), sep = "<br>")) %>%
-  layout(title = "Population-normalized COVID-19 deaths vs. population density",
-                  yaxis = list(title = "Deaths per 100k"), xaxis = list(title = "Population Density"),
-         hovermode = "compare")
+# Pivot the data to have separate columns for Tier 1 and Tier 2 averages
+library(dplyr)
+library(tidyr)
+
+final_table <- avg_procurement %>%
+  select(Ethnicity, Average_Procurement, Tier) %>%
+  pivot_wider(
+    names_from = Tier,
+    values_from = Average_Procurement,
+    names_prefix = "Tier_"
+  ) %>%
+  # Calculate Total Average
+  mutate(Total_Average = rowMeans(select(., starts_with("Tier_")), na.rm = TRUE))
+
+# Rename the columns based on the actual column names
+final_table <- final_table %>%
+  rename(
+    `Tier 1 Average` = `Tier_Tier 1`,
+    `Tier 2 Average` = `Tier_Tier 2`
+  )
+
+# Arrange and display the table
+kable(final_table)
+
+
+```
+# How much are hosptials spending on supplies from minority owned businessess? 
+
+Washington Hospital in Fremont spends in the most on minority owned suppliers, followed by Stanford Health Care. In specific category, Kaiser Permanente in Santa Clara spends the most on African American suppliers while Stanford leads for Hispanic and Asian/Pacific Category. Washington Hospital in Fremont also is the top performer in the unknown minority category while, such as Kaiser Foundation Hospital - San Diego and Contra Costa Regional Medical Center, lead in categories like total women-owned and LGBT-owned suppliers, respectively.
+
+
+```{r}
+# Create the scatter plot using ggplot2
+base_plot <- ggplot(final_hospitals, aes(x = Combined_Total, y = NET_INCOME, text = Hospital_Name)) +
+  geom_point(color = "blue", size = 2, alpha = 0.7) +
+  labs(
+    title = "Interactive Scatter Plot of Combined Total vs. Net Income",
+    x = "Total Procurement from Diverse Suppliers",
+    y = "Net Income"
+  ) +
+  theme_minimal()
+
+# Convert the ggplot object to a plotly interactive plot
+interactive_plot <- ggplotly(base_plot, tooltip = "text")
+
+# Display the plot
+interactive_plot
 
 ```
 
 
-## Showcasing plots {.tabset}
 
-### Tab 1
 
-```{r echo=FALSE}
-p1_scatter
+```{r}
+
+# Get the top diverse hospitals and select only the relevant columns
+top_diverse_hospitals <- final_hospitals %>%
+  arrange(desc(Total_Minority)) %>%  
+  select(Hospital_Name, Total_Minority) %>%  
+  head(n = 10)  
+
+kable(top_diverse_hospitals, col.names = c("Hospital Name", "Combined Total Spent on Minority Owned Suppliers"))
+
+
 ```
 
-### Tab 2
 
-```{r echo=FALSE}
-p2_scatter
+
+```{r, results='asis'}
+selected_vars <- c(
+  "Total_African_American", "Total_Hispanic_American",
+  "Total_Native_American", "Total_Asian_Pacific_American",
+  "Total_Unknown_Minority", "Total_Minority",
+  "Total_Women", "Total_LGBT", "Total_Disabled_Veteran"
+)
+
+top_hospitals_df <- data.frame(Top_Hospital = character(), Top_Value = numeric(), Category = character(), stringsAsFactors = FALSE)
+
+# Loop through each variable to find the top hospital based on the percentage
+for (var_name in selected_vars) {
+  top_hospital <- final_hospitals %>%
+    filter(!is.na(!!sym(var_name))) %>%  # Exclude NA values for the variable
+    mutate(Percentage = (!!sym(var_name) / Total_Hospital_Procurement) * 100) %>%  # Calculate the percentage
+    filter(Percentage <= 99.999) %>%  # Exclude rows where the percentage is over 100
+    top_n(1, Percentage) %>%  # Get the hospital with the highest percentage
+    select(Hospital_Name, Percentage) %>%  # Select relevant columns
+    rename(Top_Hospital = Hospital_Name, Top_Value = Percentage) %>%  # Rename for clarity
+    mutate(Category = var_name)  # Add the category as a new column
+  
+  top_hospitals_df <- rbind(top_hospitals_df, top_hospital)
+}
+
+# Display the table with kable, including the Category column
+kable(top_hospitals_df, 
+      col.names = c("Top Hospital", "% of Total Procurement", "Category"),
+      caption = "Top Performing Hospitals by Category")
+
+
 ```
 
-## {-}
+
+# Where are the most diverse hopstials located? 
+Across categories and in total, a majority of hospitals that spend the most money on diverse suppliers residei n the bay area. However, there are a signicant number of hospitals that spend a lot of money suppliers from women and disabled veterans in Southern California. Hospitals in northern California include a few state and University of California hospitals including UC San Francisco and Stanford. 
+
+
+```{r}
+total_minority_palette <- colorNumeric(palette = "Reds", 
+                                       domain = final_hospitals$Total_Minority)
+
+# Create a leaflet plot for hospitals
+leafplot <- leaflet(final_hospitals) %>% 
+  addProviderTiles('CartoDB.Positron') %>% 
+  addCircles(
+    lat = ~latitude,  
+    lng = ~longitude,  
+    label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
+    color = ~total_minority_palette(Total_Minority),  
+    opacity = 1, 
+    fillOpacity = 1,
+    stroke = FALSE,  
+    radius = 5       
+  ) %>%
+  addLegend('bottomleft', 
+            pal = total_minority_palette, 
+            values = final_hospitals$Total_Minority,
+            title = 'Total Minority in Hospitals', 
+            opacity = 1) %>%
+  setView(lng = -119.4179, lat = 36.7783, zoom = 6)  # Set view to California
+
+
+leafplot
+
+```
+
+
+```{r, eval=FALSE}
+# Define the Shiny UI
+ui <- fluidPage(
+  titlePanel("Interactive Hospital Data Map"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("variable", "Choose a variable to display:",
+                  choices = selected_vars,
+                  selected = selected_vars[1])
+    ),
+    mainPanel(
+      leafletOutput("map", height = 600)
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  # Function to create the color palette and leaflet map for selected variable
+  create_map <- function(var_name) {
+    color_pal <- colorNumeric("YlOrRd", domain = final_hospitals[[var_name]], na.color = "transparent")
+    
+    leaflet(data = final_hospitals) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      setView(lng = -119.4179, lat = 36.7783, zoom = 6) %>%
+      addCircles(
+        lat = ~latitude, lng = ~longitude,
+        label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
+        color = ~color_pal(final_hospitals[[var_name]]),  
+        opacity = 1, 
+        fillOpacity = 1,
+        stroke = FALSE,  
+        radius = 5       
+      ) %>%
+      addLegend('bottomleft', 
+                pal = color_pal, 
+                values = final_hospitals[[var_name]],
+                title = paste(var_name, "in Hospitals"), 
+                opacity = 1)
+  }
+  
+  # Render the map based on the selected variable
+  output$map <- renderLeaflet({
+    create_map(input$variable)
+  })
+}
+
+server <- function(input, output, session) {
+  
+  # Function to create the color palette and leaflet map for selected variable
+  create_map <- function(var_name) {
+    color_pal <- colorNumeric("YlOrRd", domain = final_hospitals[[var_name]], na.color = "transparent")
+    
+    leaflet(data = final_hospitals) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      setView(lng = -119.4179, lat = 36.7783, zoom = 6) %>%
+      addCircles(
+        lat = ~latitude, lng = ~longitude,
+        label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
+        color = ~color_pal(final_hospitals[[var_name]]),  
+        opacity = 1, 
+        fillOpacity = 1,
+        stroke = FALSE,  
+        radius = 5       
+      ) %>%
+      addLegend('bottomleft', 
+                pal = color_pal, 
+                values = final_hospitals[[var_name]],
+                title = paste(var_name, "in Hospitals"), 
+                opacity = 1)
+  }
+  
+  # Render the map based on the selected variable
+  output$map <- renderLeaflet({
+    create_map(input$variable)
+  })
+}
+shinyApp(ui, server)
+
+
+```
+
+
+
+
+# What hosptials make the most money?
+
+Regardless of supplier diversity, the top earning hosptials are in the bay area or Los Angeles/Orange County areas. Cedars_Sinai, LA General, UCLA, and Childrens Hopsital are in the top 10 earning hospitals in  California, however this does not mean they spend the most on supplies from minority owned businesses. 
+
+Most hospitals in the plot below net the average amount in income every year, with some like Eden Medical Center earning the least amount of income. 
+
+```{r}
+
+# Load the knitr package if it’s not already loaded
+library(knitr)
+
+# Prepare the top hospitals table
+top_hospitals <- final_hospitals %>%
+  arrange(desc(NET_INCOME)) %>%  
+  head(n = 10) %>%  
+  select(Hospital_Name, NET_INCOME)
+
+# Display the table with just kable
+kable(top_hospitals, 
+      col.names = c("Hospital Name", "Net Income"), 
+      caption = "Top 10 Hospitals by Net Income",
+      format = "html")  # Specify HTML format to ensure compatibility in an HTML document
+
+
+```
+
+
+
+
+
+
+
+
+# Is diverse supplier procurement correlated with net hospital income?
+
+Each hospital also reports tier 1 and tier 2 spend for each category of diverse suppliers. Tier 1 spend refers to the total amount of procurement dollars that an organization spends directly with a certified diverse supplier. Tier 2, on the other hand represents the total amount of procurement dollars that an organization spends with a given supplier, who then sources products and services from another certified diverse supplier. Tier 2 relationships enable hospitals to increase diversity spend while working with existing suppliers or with suppliers who may possess rare capabilities. 
+
+To investigate whether or not the relationship between supplier diversity and net income for a hospital can vary between these two types of procurement from diverse suppliers. Correlations were ran between net income and supplier procurement. 
+
+
+There is moderate positive correlation between Tier 1 suppliers that are Hispanic, and women owned (0.59,0.60), as well a s total procurement from Hispanic owned suppliers.  There is also a slight negative correlation between tier two supplier procurement from suppliers that are women owned, LGBT owned, and overall (<0) suggesting a negative correlation between increasing tier 2 procurement form diverse suppliers and net income. 
+
+
+
+```{r}
+# Define selected variables
+selected_vars <- c(
+  "Total_African_American", "Total_Hispanic_American",
+  "Total_Native_American", "Total_Asian_Pacific_American",
+  "Total_Unknown_Minority", "Total_Minority",
+  "Total_Women", "Total_LGBT", "Total_Disabled_Veteran",
+  "NET_INCOME"
+)
+
+# Define Tier I and Tier II variables
+tier1_vars <- c(
+  "Tier_I_African_American",
+  "Tier_I_Hispanic_American",
+  "Tier_I_Native_American",
+  "Tier_I_Asian_Pacific_American",
+  "Tier_I_Unknown_Minority",
+  "Total_Tier_I_Minority",
+  "Tier_I_Women",
+  "Tier_I_LGBT",
+  "Tier_I_Disabled_Veteran",
+  "Tier_I_Less_Duplicated_Amount",
+  "Combined_Tier_I_Total"
+)
+
+tier2_vars <- c(
+  "Tier_II_African_American",
+  "Tier_II_Hispanic_American",
+  "Tier_II_Native_American",
+  "Tier_II_Asian_Pacific_American",
+  "Tier_II_Unknown_Minority",
+  "Total_Tier_II_Minority",
+  "Tier_II_Women",
+  "Tier_II_LGBT",
+  "Tier_II_Disabled_Veteran",
+  "Tier_II_Less_Duplicated_Amount",
+  "Combined_Tier_II_Total"
+)
+
+# Combine Tier I and Tier II variables into one list
+all_vars <- c(tier1_vars, tier2_vars, selected_vars)
+
+# Function to calculate correlations for a specific ethnic group
+calculate_group_correlations <- function(group_vars, net_income_col) {
+  # Create a correlation matrix for the ethnic group and NET_INCOME
+  correlation_data <- final_hospitals %>%
+    select(all_of(c(group_vars, net_income_col))) %>%
+    filter(complete.cases(.))  # Remove rows with any NA values
+  
+  # Calculate the correlation matrix
+  correlation_matrix <- cor(correlation_data, use = "complete.obs")
+  
+  # Extract correlations with NET_INCOME
+  cor_with_net_income <- correlation_matrix[net_income_col, group_vars]
+  
+  return(cor_with_net_income)
+}
+
+# Calculate correlations for each ethnic group
+ethnicity_groups <- c(
+  "African_American", "Hispanic_American", "Native_American", 
+  "Asian_Pacific_American", "Unknown_Minority", "Minority", 
+  "Women", "LGBT", "Disabled_Veteran"
+)
+
+# Create empty vectors to store the correlation values
+tier1_correlations <- numeric(length(ethnicity_groups))
+tier2_correlations <- numeric(length(ethnicity_groups))
+overall_correlations <- numeric(length(ethnicity_groups))
+
+# Loop through each ethnicity and calculate correlations
+for (i in 1:length(ethnicity_groups)) {
+  # Get the specific ethnic group variables for Tier 1 and Tier 2
+  tier1_ethnicity_vars <- grep(ethnicity_groups[i], tier1_vars, value = TRUE)
+  tier2_ethnicity_vars <- grep(ethnicity_groups[i], tier2_vars, value = TRUE)
+  
+  # Calculate correlations for Tier 1, Tier 2, and Total ethnic group (overall)
+  tier1_correlations[i] <- calculate_group_correlations(tier1_ethnicity_vars, "NET_INCOME")
+  tier2_correlations[i] <- calculate_group_correlations(tier2_ethnicity_vars, "NET_INCOME")
+  
+  # Calculate overall correlation for the ethnic group
+  overall_ethnicity_vars <- c(tier1_ethnicity_vars, tier2_ethnicity_vars)
+  overall_correlations[i] <- calculate_group_correlations(overall_ethnicity_vars, "NET_INCOME")
+}
+
+# Create a summary table
+correlation_table <- data.frame(
+  Ethnicity = ethnicity_groups,
+  Tier_1_Correlation = tier1_correlations,
+  Tier_2_Correlation = tier2_correlations,
+  Total_Average_Correlation = overall_correlations
+)
+
+# Display the table using kable
+kable(correlation_table, 
+      col.names = c("Ethnicity", "Tier 1 Correlation", "Tier 2 Correlation", "Total Average Correlation"),
+      caption = "Correlation of Diverse Groups with Net Income in Tier 1, Tier 2, and Overall Procurement"
+)
+
+
+```
+
+CONNECTION TO MEDICAL 
+
+```{R}
+# Function to calculate correlation with medical revenue for each selected variable ratio
+calculate_ratio_correlation <- function(group_vars, medical_revenue_col, procurement_col) {
+  
+  # Create an empty vector to store correlation values
+  correlation_values <- numeric(length(group_vars))
+  
+  # Loop through each group variable (e.g., Total_African_American, Total_Hispanic_American)
+  for (i in 1:length(group_vars)) {
+    selected_var <- group_vars[i]
+    
+    # Ensure the selected variable exists in the dataset
+    if (!(selected_var %in% colnames(final_hospitals))) {
+      stop(paste("Column", selected_var, "does not exist in the dataset"))
+    }
+    
+    # Calculate the ratio of the selected variable to Total_Hospital_Procurement
+    final_hospitals <- final_hospitals %>%
+      mutate(Ratio = .[[selected_var]] / .[[procurement_col]])  # Create the Ratio column
+    
+    # Select columns for correlation calculation: Ratio and medical revenue
+    correlation_data <- final_hospitals %>%
+      select(all_of(c(selected_var, "Ratio", medical_revenue_col))) %>%
+      filter(complete.cases(.))  # Remove rows with any NA values
+    
+    # Calculate the correlation between Ratio and MEDICAL_REVENUE
+    correlation_matrix <- cor(correlation_data, use = "complete.obs")
+    
+    # Extract the correlation between the Ratio and MEDICAL_REVENUE
+    correlation_values[i] <- correlation_matrix["Ratio", medical_revenue_col]
+  }
+  
+  # Return the correlation values
+  return(correlation_values)
+}
+
+# Define the selected variables and medical revenue column
+selected_vars <- c(
+  "Total_African_American", "Total_Hispanic_American", "Total_Native_American", 
+  "Total_Asian_Pacific_American", "Total_Unknown_Minority", "Total_Minority", 
+  "Total_Women", "Total_LGBT", "Total_Disabled_Veteran"
+)
+
+# Define the procurement column
+procurement_col <- "Total_Hospital_Procurement"
+
+# Define the medical revenue column
+medical_revenue_col <- "NETRV_MCAL_TR"  # Or your specific column name for medical revenue
+
+# Call the function to get correlation values for each selected variable
+correlation_results <- calculate_ratio_correlation(selected_vars, medical_revenue_col, procurement_col)
+
+# Create a summary table with the results
+correlation_table <- data.frame(
+  Variable = selected_vars,
+  Correlation_with_Medical_Revenue = correlation_results
+)
+
+# Display the table using kable
+kable(correlation_table, 
+      col.names = c("Variable", "Correlation with Medical Revenue"),
+      caption = "Correlation of Selected Variables' Ratios with Medical Revenue"
+)
+
+
+```
+
+# What are hospitals saying in their commitment to supplier diversity? 
+
+Each hospital is also required to report a supplier diversity statement to state their commitment to procuring from diverse suppliers. While not required, a majority of hospitals in this dataset reported a statement. To identify common themes, I highlighted the top 20 unique words and 3-word phrases to identify common themes in supplier diversity statements. 
+
+From this analysis suppliers have a strong commitment to procuring from diverse suppliers in order to support the business needs of the hospitals. They also aim to drive some sort of competition, possibly between suppliers to lower prices.
+```{r}
+final_hospitals %>%
+  unnest_tokens(word, Supplier_Diversity_Statement) %>%
+   filter(!str_detect(word, "\\d")) %>% 
+   anti_join(stop_words, by = c("word"))%>%
+  count(word, sort=TRUE) %>%
+  top_n(20, n) %>%
+  ggplot(aes(x = n, y = fct_reorder(word, n))) +
+  geom_col()
+
+
+final_hospitals %>%
+  unnest_ngrams(token, Supplier_Diversity_Statement, n = 3) %>%
+  count(token, sort=TRUE) %>%
+  top_n(20, n) %>%
+  ggplot(aes(x = n, y = fct_reorder(token, n))) +
+  geom_col()
+```
+
+
+```{r}
+# Load necessary libraries
+# Load necessary libraries
+library(tidyverse)
+library(tidytext)
+library(knitr)
+library(SnowballC)  # For stemming
+library(dplyr)
+library(stringr)
+library(stopwords)
+
+# Clean and preprocess the Supplier Diversity Statement column
+final_hospitals_clean <- final_hospitals %>%
+  mutate(Supplier_Diversity_Statement = tolower(Supplier_Diversity_Statement)) %>%
+  mutate(Supplier_Diversity_Statement = str_remove_all(Supplier_Diversity_Statement, "[^[:alpha:][:space:]]")) %>%
+  mutate(Supplier_Diversity_Statement = str_squish(Supplier_Diversity_Statement)) %>%
+  mutate(Supplier_Diversity_Statement = sapply(Supplier_Diversity_Statement, function(x) {
+    words <- str_split(x, " ")[[1]]
+    words_clean <- words[!words %in% stopwords("en")]
+    paste(words_clean, collapse = " ")
+  }))
+
+
+# Tokenize the Supplier_Diversity_Statement column grouped by Type_Control
+tf_idf_grouped <- final_hospitals_clean %>%
+  unnest_tokens(word, Supplier_Diversity_Statement) %>%   # Tokenizing the words from Supplier_Diversity_Statement column
+  count(Type_Control, word) %>%                          # Count words grouped by Type_Control
+  group_by(Type_Control) %>%                             # Group by Type_Control
+  bind_tf_idf(word, Type_Control, n) %>%                  # Calculate TF-IDF within each Type_Control group
+  arrange(desc(tf_idf)) %>%                              # Sort by TF-IDF scores
+  group_by(Type_Control) %>%
+  top_n(5, tf_idf)                                      # Get the top 5 words per each Type_Control group
+
+# Display the result in a table
+kable(tf_idf_grouped, caption = "TF-IDF values for the Top 5 Words in Supplier Diversity Statements by Type Control (Preprocessed)")
+
+```
+
+
+INTERACTIVE E TABLE 
+
+```{r}
+library(DT)
+library(dplyr)
+
+# Assuming final_hospitals is your dataset with columns "Hospital_Name" and "Supplier_Diversity_Statement"
+
+# Create the interactive table
+datatable(final_hospitals %>% select(Hospital_Name, Supplier_Diversity_Statement), 
+          options = list(pageLength = 5, autoWidth = TRUE), 
+          caption = "Hospital Supplier Diversity Statements")
+
+
+```
+
+
+
+# Conclusion 
+
+Overall, preliminary data suggest a potential positive relationship between procurement from supplier diversity and increased income for hospitals. This remains a critical priority for hospitals and medical centers throughout California. Notably, some of the highest-earning hospitals are not allocating significant resources to diverse suppliers. Further analysis with greater statistical power is essential to clarify this relationship. It is important to address health equity gaps and combat systemic racism and injustice by actively investing in and procuring from minority-owned businesses.
+
+A potential other area of analysis could also include removing/isolating the amount of money spent on suppliers that are the industry standard. For example, Epic Health Systems is one of the industry leaders in electronic medical record software applications and holds medical records of 78% of patients in the United States. Its CEO and founder is businesswoman Judidth Faulker who is was called "the most powerful woman in healthcare" by Forbes in 2013. n this dataset, as an industry leader, Epic Health Systems would still be categorized as a minority supplier due to Judith Faulkner’s ownership status. This presents an interesting dynamic, as Epic’s influence and widespread use could skew the analysis of diversity spend, highlighting funds allocated to suppliers who are industry giants. Examining the data specifically for minority suppliers who are not major players in their industries could provide valuable insights into how funds are distributed among smaller, potentially emerging minority-owned businesses and the unique challenges they face in achieving industry traction and growth.
