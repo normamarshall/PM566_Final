@@ -7,7 +7,7 @@ warning: false
 runtime: shiny
 ---
 
-```{r}
+```{r, echo = FALSE}
 library(dplyr)
 library(readxl)
 library(tidygeocoder)
@@ -44,7 +44,7 @@ Following the merge, several variables indicating procurement from diverse backg
 
 Frequency tables were generated to view top hospitals in net income, supplier procurement from different backgrounds, and demographic data. Maps were generated to locate the top performing hospitals and correlations were run to quantify the relationship between supplier procurement and hospital net income.
 
-```{r}
+```{r, echo = FALSE}
 hospital_suppliers <- read_excel("supplier-diversity-report-2023-extract-.xlsx")
 hospital_finances <- read_excel("hadr-2023.xlsx")
 hospitals <- merge(hospital_suppliers, hospital_finances, by = "Hospital_Name", all.x = TRUE)
@@ -54,7 +54,7 @@ final_hospitals <- hospitals %>%
  
 ```
 
-```{r}
+```{r, echo = FALSE}
 
 final_hospitals <- final_hospitals %>%
   unite("full_address", ADDRESS, CITY, ZIP_CODE, sep = ", ", remove = FALSE) %>%
@@ -64,7 +64,7 @@ final_hospitals <- final_hospitals %>%
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 final_hospitals <- final_hospitals %>%
   mutate(
     Combined_Total = as.numeric(as.character(Combined_Total)),  
@@ -94,7 +94,7 @@ In this report there are 372 hospitals with both financial and supplier diversit
 
 A majority of these hospitals (320) serve urban areas in California, as demonstrated by large clusters of hospitals around major cities such as San Francisco, San Diego, and Los Angeles. Over 53% of the hospitals are nonprofit, including church related facilities.
 
-```{r}
+```{r, echo = FALSE}
 leaflet(data = final_hospitals) %>%
   addTiles() %>%
   addCircleMarkers(~longitude, ~latitude,
@@ -105,7 +105,7 @@ leaflet(data = final_hospitals) %>%
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 
 
 
@@ -135,7 +135,7 @@ kable(type_control_freq, caption = "Frequencies of Hospital Types)")
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 # Define Tier I and Tier II variables
 tier1_vars <- c(
   "Tier_I_African_American",
@@ -221,7 +221,7 @@ kable(final_table)
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 # Assuming your current table is named `avg_procurement`
 
 # Extract ethnicities by removing prefixes and other identifiers
@@ -262,7 +262,7 @@ kable(final_table)
 
 Washington Hospital in Fremont spends in the most on minority owned suppliers, followed by Stanford Health Care. In specific category, Kaiser Permanente in Santa Clara spends the most on African American suppliers while Stanford leads for Hispanic and Asian/Pacific Category. Washington Hospital in Fremont also is the top performer in the unknown minority category while, such as Kaiser Foundation Hospital - San Diego and Contra Costa Regional Medical Center, lead in categories like total women-owned and LGBT-owned suppliers, respectively.
 
-```{r}
+```{r, echo = FALSE}
 # Create the scatter plot using ggplot2
 base_plot <- ggplot(final_hospitals, aes(x = Combined_Total, y = NET_INCOME, text = Hospital_Name)) +
   geom_point(color = "blue", size = 2, alpha = 0.7) +
@@ -281,7 +281,7 @@ interactive_plot
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 
 # Get the top diverse hospitals and select only the relevant columns
 top_diverse_hospitals <- final_hospitals %>%
@@ -294,7 +294,7 @@ kable(top_diverse_hospitals, col.names = c("Hospital Name", "Combined Total Spen
 
 ```
 
-```{r, results='asis'}
+```{r, echo = FALSE}
 selected_vars <- c(
   "Total_African_American", "Total_Hispanic_American",
   "Total_Native_American", "Total_Asian_Pacific_American",
@@ -330,7 +330,7 @@ kable(top_hospitals_df,
 
 Across categories and in total, a majority of hospitals that spend the most money on diverse suppliers residei n the bay area. However, there are a signicant number of hospitals that spend a lot of money suppliers from women and disabled veterans in Southern California. Hospitals in northern California include a few state and University of California hospitals including UC San Francisco and Stanford.
 
-```{r}
+```{r, echo = FALSE}
 # Explicitly list the variables to create maps for
 selected_vars <- c(
   "Total_African_American", "Total_Hispanic_American",
@@ -368,7 +368,7 @@ Regardless of supplier diversity, the top earning hosptials are in the bay area 
 
 Most hospitals in the plot below net the average amount in income every year, with some like Eden Medical Center earning the least amount of income.
 
-```{r}
+```{r, echo = FALSE}
 
 # Load the knitr package if it’s not already loaded
 library(knitr)
@@ -396,7 +396,7 @@ To investigate whether or not the relationship between supplier diversity and ne
 
 There is moderate positive correlation between Tier 1 suppliers that are Hispanic, and women owned (0.59,0.60), as well a s total procurement from Hispanic owned suppliers. There is also a slight negative correlation between tier two supplier procurement from suppliers that are women owned, LGBT owned, and overall (\<0) suggesting a negative correlation between increasing tier 2 procurement form diverse suppliers and net income.
 
-```{r}
+```{r, echo = FALSE}
 selected_vars <- c(
   "Total_African_American", "Total_Hispanic_American",
   "Total_Native_American", "Total_Asian_Pacific_American",
@@ -499,7 +499,7 @@ kable(correlation_table,
 
 CONNECTION TO MEDICAL
 
-```{R}
+```{r, echo = FALSE}
 # Function to calculate correlation with medical revenue for each selected variable ratio
 calculate_ratio_correlation <- function(group_vars, medical_revenue_col, procurement_col) {
   
@@ -572,7 +572,7 @@ Each hospital is also required to report a supplier diversity statement to state
 
 From this analysis suppliers have a strong commitment to procuring from diverse suppliers in order to support the business needs of the hospitals. They also aim to drive some sort of competition, possibly between suppliers to lower prices.
 
-```{r}
+```{r, echo = FALSE}
 final_hospitals %>%
   unnest_tokens(word, Supplier_Diversity_Statement) %>%
    filter(!str_detect(word, "\\d")) %>% 
@@ -591,7 +591,7 @@ final_hospitals %>%
   geom_col()
 ```
 
-```{r}
+```{r, echo = FALSE}
 # Load necessary libraries
 # Load necessary libraries
 library(tidyverse)
@@ -631,7 +631,7 @@ kable(tf_idf_grouped, caption = "TF-IDF values for the Top 5 Words in Supplier D
 
 INTERACTIVE E TABLE
 
-```{r}
+```{r, echo = FALSE}
 library(DT)
 library(dplyr)
 
