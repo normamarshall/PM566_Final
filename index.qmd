@@ -7,8 +7,6 @@ warning: false
 runtime: shiny
 ---
 
-
-
 ```{r}
 library(dplyr)
 library(readxl)
@@ -27,26 +25,24 @@ library(writexl)
 library(shiny)
 
 ```
-# Background and Research Question 
 
-To accelerate efforts to reduce health care disparities, hospitals and health systems increase their efforts in core areas such as staff and leadership diversity and cultural competence.  However, the economic relationship between healthcare systems and the communities they serve are growing in importance. 
+# Background and Research Question
 
-Supplier diversity refers to when an organization procures goods and services from a variety of businesses, including those that are at least 51% owned, managed, and operated from marginalized and minority groups. These include women, veterans, African Americans, LGBTQIA+, and more. The private sector, including the healthcare industry has incorporated supplier diversity programs into their business practices after historically being adopted by the federal government and its contractors. According to the Harvard Business Review, supplier diversity programs are important in combatting social injustice and systemic racism in the US as they actively include diverse representation and inclusion in hospital operations and supply chains. In addition, for the moral and ethical arguments, supplier diversity programs have commercial in hospitals and health systems.  These benefits include greater innovation and value through cost reductions, expansions of external partnerships, local job creation, better understanding of supply chain sourcing process and sources, and easier compliance with government and grant contracts. 
+To accelerate efforts to reduce health care disparities, hospitals and health systems increase their efforts in core areas such as staff and leadership diversity and cultural competence. However, the economic relationship between healthcare systems and the communities they serve are growing in importance.
 
-On an annual basis (individual hospital fiscal year), individual hospitals and systems report detailed facility level financial data to the Department of Health Care Access and Information (HCAI).  This data includes detailed facility level data on services capacity, inpatient/outpatient utilization, revenues, and expenses by type and payer. In addition, the Health and Safety Code Section 1339.85-1339.87 requires individual hospitals with operating expenses over $50 million to report hospital supplier and diversity reports explaining the hospitals’ supplier diversity statement and procurement efforts regarding minority, women, LGBT, and disabled veteran enterprises.  
+Supplier diversity refers to when an organization procures goods and services from a variety of businesses, including those that are at least 51% owned, managed, and operated from marginalized and minority groups. These include women, veterans, African Americans, LGBTQIA+, and more. The private sector, including the healthcare industry has incorporated supplier diversity programs into their business practices after historically being adopted by the federal government and its contractors. According to the Harvard Business Review, supplier diversity programs are important in combatting social injustice and systemic racism in the US as they actively include diverse representation and inclusion in hospital operations and supply chains. In addition, for the moral and ethical arguments, supplier diversity programs have commercial in hospitals and health systems. These benefits include greater innovation and value through cost reductions, expansions of external partnerships, local job creation, better understanding of supply chain sourcing process and sources, and easier compliance with government and grant contracts.
 
-This report merges the annual financial data and supplier diversity reports for 2023 to answer the question **Are California hospitals with diverse suppliers profitable?**  Supplier diversity aims to increase innovation and drive down prices for supplies and goods though competition while also aiming to improve health equity and combat social injustice in the US through business practices. This exploratory data analysis aims to see if funds dedicated to goods and services from diversely owned businesses can lead to better financial outcomes. 
+On an annual basis (individual hospital fiscal year), individual hospitals and systems report detailed facility level financial data to the Department of Health Care Access and Information (HCAI). This data includes detailed facility level data on services capacity, inpatient/outpatient utilization, revenues, and expenses by type and payer. In addition, the Health and Safety Code Section 1339.85-1339.87 requires individual hospitals with operating expenses over \$50 million to report hospital supplier and diversity reports explaining the hospitals’ supplier diversity statement and procurement efforts regarding minority, women, LGBT, and disabled veteran enterprises.
 
+This report merges the annual financial data and supplier diversity reports for 2023 to answer the question **Are California hospitals with diverse suppliers profitable?** Supplier diversity aims to increase innovation and drive down prices for supplies and goods though competition while also aiming to improve health equity and combat social injustice in the US through business practices. This exploratory data analysis aims to see if funds dedicated to goods and services from diversely owned businesses can lead to better financial outcomes.
 
-# Methods 
-A novel dataset was collected by merging two data sets, HCAI's Hospital Annual Financial
-Disclosure Report for 2023, and HCAI’s Supplier Diversity report from 2023. Required by state law, supplier diversity and financial data are reported each year to the HCAI. Datasets were merged on the shared hospital name variable to create a comprehensive data containing both supplier diversity and financial metrics for each hospital. 
+# Methods
 
-Following the merge, several variables indicating procurement from diverse backgrounds were recoded to be used as numeric variables, allowing for quantitative analysis. Address related variables were recoded into latitude and longitude variables to facilitate geocoding using the tidygeocoder package for recoding and the leaflet package for visualization. 
+A novel dataset was collected by merging two data sets, HCAI's Hospital Annual Financial Disclosure Report for 2023, and HCAI’s Supplier Diversity report from 2023. Required by state law, supplier diversity and financial data are reported each year to the HCAI. Datasets were merged on the shared hospital name variable to create a comprehensive data containing both supplier diversity and financial metrics for each hospital.
 
-Frequency tables were generated to view top hospitals in net income, supplier procurement from different backgrounds, and demographic data. Maps were generated to locate the top performing hospitals and correlations were run to quantify the relationship between supplier procurement and hospital net income. 
+Following the merge, several variables indicating procurement from diverse backgrounds were recoded to be used as numeric variables, allowing for quantitative analysis. Address related variables were recoded into latitude and longitude variables to facilitate geocoding using the tidygeocoder package for recoding and the leaflet package for visualization.
 
-
+Frequency tables were generated to view top hospitals in net income, supplier procurement from different backgrounds, and demographic data. Maps were generated to locate the top performing hospitals and correlations were run to quantify the relationship between supplier procurement and hospital net income.
 
 ```{r}
 hospital_suppliers <- read_excel("supplier-diversity-report-2023-extract-.xlsx")
@@ -58,7 +54,6 @@ final_hospitals <- hospitals %>%
  
 ```
 
-
 ```{r}
 
 final_hospitals <- final_hospitals %>%
@@ -68,6 +63,7 @@ final_hospitals <- final_hospitals %>%
 
 
 ```
+
 ```{r}
 final_hospitals <- final_hospitals %>%
   mutate(
@@ -94,13 +90,9 @@ final_hospitals <- final_hospitals %>%
 
 # Demographics
 
+In this report there are 372 hospitals with both financial and supplier diversity data reported the to the HCAI in 2023. On average these hospitals report earning over 24 million dollars over the course of the year and spend over \$9.6 million on supplies from diverse suppliers, totaling about 9 percent of the total dollars spent on the procurement on supplies annually.
 
-In this report there are 372 hospitals with both financial and supplier diversity data reported the to the HCAI in 2023. On average these hospitals report earning over 24 million dollars over the course of the year and spend over $9.6 million on supplies from diverse suppliers, totaling about 9 percent of the total dollars spent on the procurement on supplies annually. 
-
-A majority of these hospitals (320) serve urban areas in California, as demonstrated by large clusters of hospitals around major cities such as San Francisco, San Diego, and Los Angeles.  Over 53% of the hospitals are nonprofit, including church related facilities. 
- 
-
-
+A majority of these hospitals (320) serve urban areas in California, as demonstrated by large clusters of hospitals around major cities such as San Francisco, San Diego, and Los Angeles. Over 53% of the hospitals are nonprofit, including church related facilities.
 
 ```{r}
 leaflet(data = final_hospitals) %>%
@@ -112,9 +104,6 @@ leaflet(data = final_hospitals) %>%
 
 
 ```
-
-
-
 
 ```{r}
 
@@ -226,7 +215,7 @@ final_table <- final_table %>%
   )
 
 # Arrange and display the table
-print(final_table)
+kable(final_table)
 
 
 
@@ -268,10 +257,10 @@ kable(final_table)
 
 
 ```
-# How much are hosptials spending on supplies from minority owned businessess? 
+
+# How much are hosptials spending on supplies from minority owned businessess?
 
 Washington Hospital in Fremont spends in the most on minority owned suppliers, followed by Stanford Health Care. In specific category, Kaiser Permanente in Santa Clara spends the most on African American suppliers while Stanford leads for Hispanic and Asian/Pacific Category. Washington Hospital in Fremont also is the top performer in the unknown minority category while, such as Kaiser Foundation Hospital - San Diego and Contra Costa Regional Medical Center, lead in categories like total women-owned and LGBT-owned suppliers, respectively.
-
 
 ```{r}
 # Create the scatter plot using ggplot2
@@ -292,9 +281,6 @@ interactive_plot
 
 ```
 
-
-
-
 ```{r}
 
 # Get the top diverse hospitals and select only the relevant columns
@@ -307,8 +293,6 @@ kable(top_diverse_hospitals, col.names = c("Hospital Name", "Combined Total Spen
 
 
 ```
-
-
 
 ```{r, results='asis'}
 selected_vars <- c(
@@ -342,131 +326,47 @@ kable(top_hospitals_df,
 
 ```
 
+# Where are the most diverse hopstials located?
 
-# Where are the most diverse hopstials located? 
-Across categories and in total, a majority of hospitals that spend the most money on diverse suppliers residei n the bay area. However, there are a signicant number of hospitals that spend a lot of money suppliers from women and disabled veterans in Southern California. Hospitals in northern California include a few state and University of California hospitals including UC San Francisco and Stanford. 
-
+Across categories and in total, a majority of hospitals that spend the most money on diverse suppliers residei n the bay area. However, there are a signicant number of hospitals that spend a lot of money suppliers from women and disabled veterans in Southern California. Hospitals in northern California include a few state and University of California hospitals including UC San Francisco and Stanford.
 
 ```{r}
-total_minority_palette <- colorNumeric(palette = "Reds", 
-                                       domain = final_hospitals$Total_Minority)
-
-# Create a leaflet plot for hospitals
-leafplot <- leaflet(final_hospitals) %>% 
-  addProviderTiles('CartoDB.Positron') %>% 
-  addCircles(
-    lat = ~latitude,  
-    lng = ~longitude,  
-    label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
-    color = ~total_minority_palette(Total_Minority),  
-    opacity = 1, 
-    fillOpacity = 1,
-    stroke = FALSE,  
-    radius = 5       
-  ) %>%
-  addLegend('bottomleft', 
-            pal = total_minority_palette, 
-            values = final_hospitals$Total_Minority,
-            title = 'Total Minority in Hospitals', 
-            opacity = 1) %>%
-  setView(lng = -119.4179, lat = 36.7783, zoom = 6)  # Set view to California
-
-
-leafplot
-
-```
-
-
-```{r, eval=FALSE}
-# Define the Shiny UI
-ui <- fluidPage(
-  titlePanel("Interactive Hospital Data Map"),
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("variable", "Choose a variable to display:",
-                  choices = selected_vars,
-                  selected = selected_vars[1])
-    ),
-    mainPanel(
-      leafletOutput("map", height = 600)
-    )
-  )
+# Explicitly list the variables to create maps for
+selected_vars <- c(
+  "Total_African_American", "Total_Hispanic_American",
+  "Total_Native_American", "Total_Asian_Pacific_American",
+  "Total_Unknown_Minority", "Total_Minority",
+  "Total_Women", "Total_LGBT", "Total_Disabled_Veteran"
 )
 
-server <- function(input, output, session) {
+create_map <- function(var_name) {
+  color_pal <- colorNumeric("Purples", domain = final_hospitals[[var_name]], na.color = "transparent")
   
-  # Function to create the color palette and leaflet map for selected variable
-  create_map <- function(var_name) {
-    color_pal <- colorNumeric("YlOrRd", domain = final_hospitals[[var_name]], na.color = "transparent")
-    
-    leaflet(data = final_hospitals) %>%
-      addProviderTiles("CartoDB.Positron") %>%
-      setView(lng = -119.4179, lat = 36.7783, zoom = 6) %>%
-      addCircles(
-        lat = ~latitude, lng = ~longitude,
-        label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
-        color = ~color_pal(final_hospitals[[var_name]]),  
-        opacity = 1, 
-        fillOpacity = 1,
-        stroke = FALSE,  
-        radius = 5       
-      ) %>%
-      addLegend('bottomleft', 
-                pal = color_pal, 
-                values = final_hospitals[[var_name]],
-                title = paste(var_name, "in Hospitals"), 
-                opacity = 1)
-  }
-  
-  # Render the map based on the selected variable
-  output$map <- renderLeaflet({
-    create_map(input$variable)
-  })
+  leaflet(data = final_hospitals) %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    setView(lng = -119.4179, lat = 36.7783, zoom = 6) %>%  
+    addCircles(
+      lat = ~latitude, lng = ~longitude,
+      color = ~color_pal(final_hospitals[[var_name]]),  
+      opacity = 1, fillOpacity = 0.8
+    ) %>%
+    addLegend("bottomleft", pal = color_pal, values = final_hospitals[[var_name]],
+              title = var_name, opacity = 1)
 }
 
-server <- function(input, output, session) {
-  
-  # Function to create the color palette and leaflet map for selected variable
-  create_map <- function(var_name) {
-    color_pal <- colorNumeric("YlOrRd", domain = final_hospitals[[var_name]], na.color = "transparent")
-    
-    leaflet(data = final_hospitals) %>%
-      addProviderTiles("CartoDB.Positron") %>%
-      setView(lng = -119.4179, lat = 36.7783, zoom = 6) %>%
-      addCircles(
-        lat = ~latitude, lng = ~longitude,
-        label = ~paste0("Hospital: ", Hospital_Name, "<br>Total Minority: ", Total_Minority),  
-        color = ~color_pal(final_hospitals[[var_name]]),  
-        opacity = 1, 
-        fillOpacity = 1,
-        stroke = FALSE,  
-        radius = 5       
-      ) %>%
-      addLegend('bottomleft', 
-                pal = color_pal, 
-                values = final_hospitals[[var_name]],
-                title = paste(var_name, "in Hospitals"), 
-                opacity = 1)
-  }
-  
-  # Render the map based on the selected variable
-  output$map <- renderLeaflet({
-    create_map(input$variable)
-  })
-}
-shinyApp(ui, server)
+# Generate a list of maps for each specified variable
+map_list <- lapply(selected_vars, create_map)
 
+# Display all maps in one view
+browsable(tagList(map_list))
 
 ```
-
-
-
 
 # What hosptials make the most money?
 
-Regardless of supplier diversity, the top earning hosptials are in the bay area or Los Angeles/Orange County areas. Cedars_Sinai, LA General, UCLA, and Childrens Hopsital are in the top 10 earning hospitals in  California, however this does not mean they spend the most on supplies from minority owned businesses. 
+Regardless of supplier diversity, the top earning hosptials are in the bay area or Los Angeles/Orange County areas. Cedars_Sinai, LA General, UCLA, and Childrens Hopsital are in the top 10 earning hospitals in California, however this does not mean they spend the most on supplies from minority owned businesses.
 
-Most hospitals in the plot below net the average amount in income every year, with some like Eden Medical Center earning the least amount of income. 
+Most hospitals in the plot below net the average amount in income every year, with some like Eden Medical Center earning the least amount of income.
 
 ```{r}
 
@@ -488,26 +388,15 @@ kable(top_hospitals,
 
 ```
 
-
-
-
-
-
-
-
 # Is diverse supplier procurement correlated with net hospital income?
 
-Each hospital also reports tier 1 and tier 2 spend for each category of diverse suppliers. Tier 1 spend refers to the total amount of procurement dollars that an organization spends directly with a certified diverse supplier. Tier 2, on the other hand represents the total amount of procurement dollars that an organization spends with a given supplier, who then sources products and services from another certified diverse supplier. Tier 2 relationships enable hospitals to increase diversity spend while working with existing suppliers or with suppliers who may possess rare capabilities. 
+Each hospital also reports tier 1 and tier 2 spend for each category of diverse suppliers. Tier 1 spend refers to the total amount of procurement dollars that an organization spends directly with a certified diverse supplier. Tier 2, on the other hand represents the total amount of procurement dollars that an organization spends with a given supplier, who then sources products and services from another certified diverse supplier. Tier 2 relationships enable hospitals to increase diversity spend while working with existing suppliers or with suppliers who may possess rare capabilities.
 
-To investigate whether or not the relationship between supplier diversity and net income for a hospital can vary between these two types of procurement from diverse suppliers. Correlations were ran between net income and supplier procurement. 
+To investigate whether or not the relationship between supplier diversity and net income for a hospital can vary between these two types of procurement from diverse suppliers. Correlations were ran between net income and supplier procurement.
 
-
-There is moderate positive correlation between Tier 1 suppliers that are Hispanic, and women owned (0.59,0.60), as well a s total procurement from Hispanic owned suppliers.  There is also a slight negative correlation between tier two supplier procurement from suppliers that are women owned, LGBT owned, and overall (<0) suggesting a negative correlation between increasing tier 2 procurement form diverse suppliers and net income. 
-
-
+There is moderate positive correlation between Tier 1 suppliers that are Hispanic, and women owned (0.59,0.60), as well a s total procurement from Hispanic owned suppliers. There is also a slight negative correlation between tier two supplier procurement from suppliers that are women owned, LGBT owned, and overall (\<0) suggesting a negative correlation between increasing tier 2 procurement form diverse suppliers and net income.
 
 ```{r}
-# Define selected variables
 selected_vars <- c(
   "Total_African_American", "Total_Hispanic_American",
   "Total_Native_American", "Total_Asian_Pacific_American",
@@ -608,7 +497,7 @@ kable(correlation_table,
 
 ```
 
-CONNECTION TO MEDICAL 
+CONNECTION TO MEDICAL
 
 ```{R}
 # Function to calculate correlation with medical revenue for each selected variable ratio
@@ -677,11 +566,12 @@ kable(correlation_table,
 
 ```
 
-# What are hospitals saying in their commitment to supplier diversity? 
+# What are hospitals saying in their commitment to supplier diversity?
 
-Each hospital is also required to report a supplier diversity statement to state their commitment to procuring from diverse suppliers. While not required, a majority of hospitals in this dataset reported a statement. To identify common themes, I highlighted the top 20 unique words and 3-word phrases to identify common themes in supplier diversity statements. 
+Each hospital is also required to report a supplier diversity statement to state their commitment to procuring from diverse suppliers. While not required, a majority of hospitals in this dataset reported a statement. To identify common themes, I highlighted the top 20 unique words and 3-word phrases to identify common themes in supplier diversity statements.
 
 From this analysis suppliers have a strong commitment to procuring from diverse suppliers in order to support the business needs of the hospitals. They also aim to drive some sort of competition, possibly between suppliers to lower prices.
+
 ```{r}
 final_hospitals %>%
   unnest_tokens(word, Supplier_Diversity_Statement) %>%
@@ -700,7 +590,6 @@ final_hospitals %>%
   ggplot(aes(x = n, y = fct_reorder(token, n))) +
   geom_col()
 ```
-
 
 ```{r}
 # Load necessary libraries
@@ -740,8 +629,7 @@ kable(tf_idf_grouped, caption = "TF-IDF values for the Top 5 Words in Supplier D
 
 ```
 
-
-INTERACTIVE E TABLE 
+INTERACTIVE E TABLE
 
 ```{r}
 library(DT)
@@ -757,9 +645,7 @@ datatable(final_hospitals %>% select(Hospital_Name, Supplier_Diversity_Statement
 
 ```
 
-
-
-# Conclusion 
+# Conclusion
 
 Overall, preliminary data suggest a potential positive relationship between procurement from supplier diversity and increased income for hospitals. This remains a critical priority for hospitals and medical centers throughout California. Notably, some of the highest-earning hospitals are not allocating significant resources to diverse suppliers. Further analysis with greater statistical power is essential to clarify this relationship. It is important to address health equity gaps and combat systemic racism and injustice by actively investing in and procuring from minority-owned businesses.
 
